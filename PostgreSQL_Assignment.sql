@@ -12,6 +12,8 @@ CREATE TABLE students (
     status VARCHAR(50)
 );
 
+
+
 -- Create "courses" table
 
 CREATE TABLE courses (
@@ -19,6 +21,8 @@ CREATE TABLE courses (
     course_name VARCHAR(200) NOT NULL,
     credits INTEGER NOT NULL
 );
+
+
 
 -- Create "enrollment" table
 
@@ -46,6 +50,8 @@ VALUES
 	('Sophia', 22, 'sophia@example.com', 50, 52, NULL),
 	('Hasan', 23, 'hasan@gmail.com', 43, 39, NULL);
 
+
+
 -- Insert sample data into "courses" table
 
 INSERT into
@@ -55,6 +61,8 @@ VALUES
 	('React.js', 4),
 	('Databases', 3),
 	('Prisma', 3);
+
+
 
 -- Insert sample data into "enrollment" table
 
@@ -70,3 +78,104 @@ VALUES
 
 
 
+----------------- Queries -----------------
+
+-- Query 1
+-- Insert a new student record
+
+INSERT into
+	students (student_name, age, email, frontend_mark, backend_mark, status)
+VALUES
+	('Asif Rezwan Kabir', 25, 'asif.kabir@example.com', 82, 95, NULL);
+
+
+
+-- Query 2
+-- Retrieve the names of all students who are enrolled in the course titled 'Next.js'
+
+SELECT 
+	s.student_name
+FROM
+	students s
+JOIN enrollment e ON s.student_id = e.student_id
+JOIN courses c ON e.course_id = c.course_id
+WHERE c.course_name = 'Next.js';
+
+
+
+-- Query 3
+-- Update the status of the student with the highest total (frontend_mark + backend_mark) to 'Awarded'
+
+UPDATE students
+SET status = 'Awarded'
+WHERE student_id = (
+    SELECT student_id
+    FROM students
+    ORDER BY (frontend_mark + backend_mark) DESC
+    LIMIT 1
+);
+
+-- Optional: If we want to update the status of ALL students (instead of 1 student) who have the highest total then we may use the below query
+
+UPDATE students
+SET status = 'Awarded'
+WHERE (frontend_mark + backend_mark)  = (
+    SELECT MAX(frontend_mark + backend_mark)
+    FROM students
+);
+
+
+
+-- Query 4
+-- Delete all courses that have no students enrolled
+
+DELETE FROM 
+	courses
+WHERE course_id NOT IN (
+    SELECT course_id
+    FROM enrollment
+);
+
+
+
+-- Query 5
+-- Retrieve the names of students using a limit of 2, starting from the 3rd student
+
+SELECT student_name
+FROM students
+ORDER BY student_id
+LIMIT 2
+OFFSET 2;
+
+
+
+-- Query 6
+-- Retrieve the course names and the number of students enrolled in each course
+
+SELECT 
+	c.course_name, COUNT(e.student_id) AS students_enrolled
+FROM courses c
+LEFT JOIN enrollment e ON c.course_id = e.course_id
+GROUP BY c.course_name;
+
+
+
+-- Query 7
+-- Calculate and display the average age of all students
+
+SELECT 
+	ROUND(AVG(age), 2) AS average_age
+FROM students;
+
+
+
+-- Query 8
+-- Retrieve the names of students whose email addresses contain 'example.com'
+
+SELECT student_name
+FROM students
+WHERE 
+	email LIKE '%example.com%';
+
+
+----------------- Queries -----------------
